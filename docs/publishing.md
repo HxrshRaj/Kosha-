@@ -15,9 +15,11 @@ means it genuinely requires something this environment cannot provide
   `flutter_launcher_icons`) produces both the legacy launcher icon and an
   Android 8+ adaptive icon (separate background/foreground layers), wired
   into `app/android/app/src/main/res/mipmap-*`.
-- **A real release build was produced**: `flutter build apk --release`
-  was run and its output verified (see "Verification" below) — this is a
-  genuine, installable release artifact, not a debug build renamed.
+- **Real release builds were produced**: both `flutter build apk
+  --release` (53.2MB APK) and `flutter build appbundle --release`
+  (51.6MB AAB, the format Play Console actually requires) were run and
+  verified (see "Verification" below) — genuine, installable release
+  artifacts, not debug builds renamed.
 - **ProGuard/R8 shrinking**: the release build uses Flutter's default
   release build type, which enables R8 code shrinking and resource
   shrinking for `--release` builds.
@@ -66,13 +68,27 @@ of scope here regardless of technical readiness.
 
 ## Verification of what's claimed "done"
 
+Actually run, on this machine:
+
 ```bash
-cd app
-flutter build apk --release
-# Output: build/app/outputs/flutter-apk/app-release.apk
+$ flutter build apk --debug
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+
+$ dart run flutter_launcher_icons
+✓ Successfully generated launcher icons
+
+$ flutter build apk --release
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from
+1645184 to 5004 bytes (99.7% reduction).
+√ Built build\app\outputs\flutter-apk\app-release.apk (53.2MB)
+
+$ flutter build appbundle --release
+√ Built build\app\outputs\bundle\release\app-release.aab (51.6MB)
 ```
 
-The command's real exit code, APK size, and `flutter build appbundle
---release` output are recorded in this repository's commit history at the
-point this file was written — see the commit that added this file for the
-actual build log excerpt.
+The release build is currently **debug-signed** (Flutter's template
+default — `signingConfig = signingConfigs.getByName("debug")` in
+`app/android/app/build.gradle.kts`), which is why it installs and runs
+but is not what Play Console would accept: that needs the real upload
+keystore from step 2 above, which requires a decision (a passphrase, a
+validity period) only the app owner should make and store.

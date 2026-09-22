@@ -53,39 +53,46 @@ emulator needed) does exactly this, reusing the real
 
 ```
 === SYNCHRONOUS on the timer-owning isolate ===
-  Work duration:              457 ms
-  Timer ticks recorded:       11
-  Max gap between ticks:      461.9 ms   (target ~16.7 ms)
-  Ticks that missed budget:   1
-  Estimated dropped frames:   26
+  Work duration:              400 ms
+  Timer ticks recorded:       10
+  Max gap between ticks:      403.8 ms   (target ~16.7 ms)
+  Ticks that missed budget:   2
+  Estimated dropped frames:   23
 
 === BACKGROUND ISOLATE via Isolate.run ===
-  Work duration:              413 ms
-  Timer ticks recorded:       35
-  Max gap between ticks:      30.2 ms   (target ~16.7 ms)
-  Ticks that missed budget:   2
+  Work duration:              349 ms
+  Timer ticks recorded:       31
+  Max gap between ticks:      28.1 ms   (target ~16.7 ms)
+  Ticks that missed budget:   1
   Estimated dropped frames:   0
 ```
 
 - **Synchronous**: the timer records essentially *one* gap covering the
-  entire 457ms of work (461.9ms ≈ the work duration) — the periodic timer
+  entire 400ms of work (403.8ms ≈ the work duration) — the periodic timer
   could not fire at all while the isolate was busy. At a 16.7ms frame
-  budget, that is roughly **26 consecutive dropped frames** — well past
+  budget, that is roughly **23 consecutive dropped frames** — well past
   the point a user perceives as a freeze (Android's own ANR heuristics
   start caring around 5 seconds of total unresponsiveness; a single
-  janky import is nowhere near that, but 26 dropped frames in one stall
+  janky import is nowhere near that, but 23 dropped frames in one stall
   is very visibly a stutter, and doing this on every import of a
   multi-year statement would compound).
-- **Background isolate**: the max gap (30.2ms) is in the normal range of
+- **Background isolate**: the max gap (28.1ms) is in the normal range of
   `Timer.periodic` jitter on a loaded machine — the timer kept ticking
-  essentially on schedule *throughout* the 413ms of work happening on the
+  essentially on schedule *throughout* the 349ms of work happening on the
   other isolate. Zero estimated dropped frames.
 
 Both runs used the identical CSV and identical categorization logic —
 the only variable is which isolate does the work. The difference is the
-whole point: `compute()` didn't make the work faster (413ms vs. 457ms —
+whole point: `compute()` didn't make the work faster (349ms vs. 400ms —
 roughly the same total CPU cost, plus isolate-spawn overhead), it made
 the work *not block the isolate that owns the UI*.
+
+This was run twice on this machine, once under heavy background CPU load
+(a concurrent Gradle build) and once with the CPU idle — both runs show
+the same qualitative result (sync: one huge gap ≈ the full work duration;
+isolate: normal ~16-30ms jitter throughout), so the effect is the
+threading choice, not incidental machine load. The numbers above are
+from the idle-CPU run.
 
 Reproduce it yourself:
 ```bash
