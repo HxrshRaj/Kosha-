@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,10 +9,18 @@ from .routers import categories, summary, transactions
 
 Base.metadata.create_all(bind=engine)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    seed_default_categories()
+    yield
+
+
 app = FastAPI(
     title="Kosha API",
     description="Personal finance tracker REST API — transactions, categories, and spending analytics.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -39,7 +49,6 @@ DEFAULT_CATEGORIES = [
 ]
 
 
-@app.on_event("startup")
 def seed_default_categories() -> None:
     db = SessionLocal()
     try:

@@ -16,6 +16,7 @@ app/.pub-cache/
 app/.pub/
 app/build/
 app/android/.gradle/
+app/android/.kotlin/
 app/android/captures/
 app/android/local.properties
 app/android/**/GeneratedPluginRegistrant.java
@@ -28,6 +29,14 @@ app/ios/.symlinks/
 # --- Signing (never commit real keystores) ---
 *.jks
 *.keystore
+
+# --- Local machine env (this dev machine's SDK paths, not portable) ---
+.devenv.sh
+.claude/
+
+# --- Generated sample data (regenerate via backend/scripts/generate_sample_csv.py) ---
+backend/sample_transactions_large.csv
+backend/sample_transactions_small.csv
 
 # --- Tooling / OS ---
 .vscode/
