@@ -1,0 +1,37 @@
+# --- Backend (Python) ---
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.db
+backend/.env
+*.pyc
+
+# --- Flutter / Dart ---
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/.pub-cache/
+app/.pub/
+app/build/
+app/android/.gradle/
+app/android/captures/
+app/android/local.properties
+app/android/**/GeneratedPluginRegistrant.java
+app/android/key.properties
+app/*.iml
+app/ios/Flutter/.last_build_id
+app/ios/Pods/
+app/ios/.symlinks/
+
+# --- Signing (never commit real keystores) ---
+*.jks
+*.keystore
+
+# --- Tooling / OS ---
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
