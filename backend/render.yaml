@@ -6,6 +6,14 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Pinned because Render's default (3.14 at time of writing) has no
+      # prebuilt wheel for pydantic-core yet, so pip falls back to
+      # compiling it from source via Rust/maturin — which fails on
+      # Render's read-only build filesystem. 3.11 is what this backend
+      # was actually developed and tested against (see README).
+      - key: PYTHON_VERSION
+        value: 3.11.9
     # No DATABASE_URL set: the backend defaults to a local SQLite file
     # (see app/database.py). Render's free plan only allows one free
     # Postgres per account, so this avoids provisioning a second one.
