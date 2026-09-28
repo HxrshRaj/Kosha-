@@ -23,9 +23,12 @@ means it genuinely requires something this environment cannot provide
 - **ProGuard/R8 shrinking**: the release build uses Flutter's default
   release build type, which enables R8 code shrinking and resource
   shrinking for `--release` builds.
-- **Backend deployable via Blueprint**: `backend/render.yaml` lets a
-  Render account deploy the API with one click via
-  "New → Blueprint", no manual dashboard configuration needed.
+- **Backend is deployed and live**: https://kosha-api-j093.onrender.com
+  (free tier — first request after idling takes a few seconds to wake).
+  Deployed via `backend/render.yaml` as a Render Blueprint (Blueprint
+  path set to `backend/render.yaml` since this is a monorepo). Verified
+  with a real create + summary round trip against the live instance, not
+  just a health check.
 
 ## What genuinely remains (needs an account/cost only the app owner can provide)
 
@@ -60,11 +63,6 @@ of scope here regardless of technical readiness.
    ad SDK, no third-party trackers are integrated).
 6. **Upload the `.aab`, complete the release rollout** (internal testing
    track first is the recommended path before production).
-7. **Backend production deployment**: `backend/render.yaml` is ready for
-   one-click deploy on Render, but actually creating the Render account
-   and clicking deploy needs the app owner's own account (account
-   creation and entering billing/API credentials on someone else's
-   behalf is out of scope for an automated assistant).
 
 ## Verification of what's claimed "done"
 

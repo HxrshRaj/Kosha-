@@ -65,11 +65,16 @@ temp SQLite file, not the dev database.
 
 ### Deploy
 
+Live at **https://kosha-api-j093.onrender.com** (free tier — the first
+request after idling may take a few seconds to wake up). Interactive
+docs: https://kosha-api-j093.onrender.com/docs
+
 `backend/render.yaml` is a Render Blueprint: on Render, "New → Blueprint"
-against this repo provisions the API and a managed Postgres instance with
-no manual configuration. (Actually clicking that through requires a
-Render account, which is outside what this build could do
-autonomously — see the final summary.)
+against this repo provisions the API with no manual configuration beyond
+pointing it at `backend/render.yaml` as the Blueprint path (this is a
+monorepo, so Render's root-default won't find it). It deploys with a
+local SQLite file by default — set `DATABASE_URL` in the Render
+dashboard to point at a Postgres instance instead if you have one.
 
 ## Flutter app
 
@@ -108,13 +113,14 @@ app/lib/
 ```bash
 cd app
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+flutter run --dart-define=API_BASE_URL=https://kosha-api-j093.onrender.com
 ```
 
-`10.0.2.2` is the Android emulator's alias for the host machine's
-`localhost`; on a physical device, either `adb reverse tcp:8000
-tcp:8000` or point `API_BASE_URL` at your machine's LAN IP. Once the
-backend is deployed, point it at the real URL instead.
+That points at the live deployment — no local backend needed. For local
+backend development instead: `10.0.2.2` is the Android emulator's alias
+for the host machine's `localhost`, so run the backend locally and use
+`--dart-define=API_BASE_URL=http://10.0.2.2:8000`; on a physical device,
+either `adb reverse tcp:8000 tcp:8000` or point at your machine's LAN IP.
 
 ### Offline-first behavior
 
