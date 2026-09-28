@@ -6,14 +6,12 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: kosha-db
-          property: connectionString
-
-databases:
-  - name: kosha-db
-    plan: free
-    databaseName: kosha
-    user: kosha
+    # No DATABASE_URL set: the backend defaults to a local SQLite file
+    # (see app/database.py). Render's free plan only allows one free
+    # Postgres per account, so this avoids provisioning a second one.
+    # Tradeoff: Render's free web service disk is ephemeral across
+    # redeploys (it persists across restarts, not across a new deploy),
+    # so data resets whenever you push a new commit. If you already have
+    # a free Postgres on Render, point DATABASE_URL at it manually in the
+    # dashboard instead — no code change needed, app/database.py reads it
+    # from the environment either way.
