@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/api_client.dart';
 import '../services/category_api_service.dart';
+import '../services/live_updates_service.dart';
 import '../services/local_cache_service.dart';
 import '../services/summary_api_service.dart';
 import '../services/sync_service.dart';
@@ -47,3 +48,13 @@ final connectivityStatusProvider = StreamProvider<bool>((ref) {
     (results) => !results.contains(ConnectivityResult.none),
   );
 });
+
+final liveUpdatesServiceProvider = Provider<LiveUpdatesService>(
+  (ref) => LiveUpdatesService(baseUrl: ApiClient.defaultBaseUrl),
+);
+
+/// Change events pushed by the backend. Auto-disposed so the socket closes
+/// when nothing is listening.
+final liveChangesProvider = StreamProvider.autoDispose<LiveChange>(
+  (ref) => ref.watch(liveUpdatesServiceProvider).changes(),
+);

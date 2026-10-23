@@ -25,6 +25,10 @@ class TransactionsNotifier
   Future<List<Transaction>> build(String month) async {
     final sync = ref.watch(syncServiceProvider);
     final cached = sync.cachedTransactions(month: month);
+    // Another client (or this one) changed data on the server: re-sync.
+    ref.listen(liveChangesProvider, (_, next) {
+      if (next is AsyncData) refresh();
+    });
     // Kick off the network reconciliation without blocking the first paint.
     Future.microtask(() => refresh());
     return cached;
