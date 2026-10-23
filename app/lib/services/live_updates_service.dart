@@ -69,11 +69,12 @@ class LiveUpdatesService {
     Timer? timer;
     var closed = false;
     var attempt = 0;
+    late Future<void> Function() connect;
 
     void scheduleReconnect() {
       if (closed) return;
       final delay = backoff(attempt++);
-      timer = Timer(delay, connect);
+      timer = Timer(delay, () => connect());
     }
 
     Future<void> connectImpl() async {
@@ -96,10 +97,10 @@ class LiveUpdatesService {
       }
     }
 
-    connect() => connectImpl();
+    connect = connectImpl;
 
     controller = StreamController<LiveChange>(
-      onListen: connect,
+      onListen: () => connect(),
       onCancel: () async {
         closed = true;
         timer?.cancel();
