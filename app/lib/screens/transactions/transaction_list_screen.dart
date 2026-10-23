@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../blocs/transaction_filter_cubit.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../models/transaction.dart';
 import '../../models/transaction_type.dart';
 import '../../providers/core_providers.dart';
 import '../../providers/transaction_providers.dart';
@@ -30,6 +33,23 @@ class TransactionListScreen extends ConsumerWidget {
     final isOnlineAsync = ref.watch(connectivityStatusProvider);
     final isOffline = isOnlineAsync.valueOrNull == false;
 
+    return BlocProvider(
+      create: (_) => TransactionFilterCubit(),
+      child: BlocBuilder<TransactionFilterCubit, TransactionFilter>(
+        builder: (context, filter) =>
+            _buildScaffold(context, ref, month, transactionsAsync, isOffline, filter),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    WidgetRef ref,
+    String month,
+    AsyncValue<List<Transaction>> transactionsAsync,
+    bool isOffline,
+    TransactionFilter filter,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kosha'),
@@ -60,6 +80,7 @@ class TransactionListScreen extends ConsumerWidget {
       body: Column(
         children: [
           if (isOffline) const OfflineBanner(),
+          _FilterBar(filter: filter),
           Expanded(
             child: transactionsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -68,7 +89,17 @@ class TransactionListScreen extends ConsumerWidget {
                 onRetry: () =>
                     ref.read(transactionsProvider(month).notifier).refresh(),
               ),
-              data: (transactions) {
+              data: (all) {
+                final transactions = filter.apply(all);
+                if (all.isNotEmpty && transactions.isEmpty) {
+                  return EmptyStateView(
+                    icon: Icons.search_off,
+                    title: 'No matches',
+                    message: 'Nothing matches this search or filter.',
+                    actionLabel: 'Clear filters',
+                    onAction: () => context.read<TransactionFilterCubit>().clear(),
+                  );
+                }
                 if (transactions.isEmpty) {
                   return const EmptyStateView(
                     icon: Icons.receipt_long_outlined,
@@ -121,6 +152,48 @@ class TransactionListScreen extends ConsumerWidget {
     final shifted = DateTime(current.year, current.month + delta);
     ref.read(selectedMonthProvider.notifier).state = DateFormat('yyyy-MM')
         .format(shifted);
+  }
+}
+
+class _FilterBar extends StatelessWidget {
+  final TransactionFilter filter;
+
+  const _FilterBar({required this.filter});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<TransactionFilterCubit>();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0,
+      ),
+      child: Column(
+        children: [
+          TextField(
+            key: const Key('transaction-search'),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: 'Search notes',
+              isDense: true,
+            ),
+            onChanged: cubit.setQuery,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            children: [
+              for (final t in TransactionType.values) ...[
+                FilterChip(
+                  label: Text(t.name[0].toUpperCase() + t.name.substring(1)),
+                  selected: filter.type == t,
+                  onSelected: (on) => cubit.setType(on ? t : null),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

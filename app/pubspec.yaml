@@ -38,6 +38,13 @@ dependencies:
   # State management: see README "State management" for why Riverpod.
   flutter_riverpod: ^2.6.1
 
+  # BLoC pattern (Cubit) for the transaction list filter.
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
+
+  # Backend change feed (WS /ws/events).
+  web_socket_channel: ^3.0.1
+
   # REST API client: typed exceptions + interceptors for logging/timeouts.
   dio: ^5.7.0
 
@@ -62,6 +69,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  bloc_test: ^10.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

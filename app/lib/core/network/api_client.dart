@@ -17,7 +17,7 @@ class ApiClient {
   ApiClient({String? baseUrl})
     : _dio = Dio(
         BaseOptions(
-          baseUrl: baseUrl ?? _defaultBaseUrl,
+          baseUrl: baseUrl ?? defaultBaseUrl,
           connectTimeout: const Duration(seconds: 8),
           receiveTimeout: const Duration(seconds: 8),
           headers: {'Content-Type': 'application/json'},
@@ -29,7 +29,7 @@ class ApiClient {
   }
 
   static const _fromEnv = String.fromEnvironment('API_BASE_URL');
-  static String get _defaultBaseUrl =>
+  static String get defaultBaseUrl =>
       _fromEnv.isNotEmpty ? _fromEnv : 'http://10.0.2.2:8000';
 
   Future<T> request<T>(

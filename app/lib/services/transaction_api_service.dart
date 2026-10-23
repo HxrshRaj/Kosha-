@@ -18,8 +18,8 @@ class TransactionApiService {
         (dio) => dio.get(
           '/transactions',
           queryParameters: {
-            if (month != null) 'month': month,
-            if (categoryId != null) 'category_id': categoryId,
+            'month': ?month,
+            'category_id': ?categoryId,
             if (type != null) 'type': type.toJson(),
           },
         ),
