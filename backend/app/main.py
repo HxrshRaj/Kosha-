@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import Base, SessionLocal, engine
+from . import observability
 from .routers import categories, summary, transactions
 
 Base.metadata.create_all(bind=engine)
@@ -31,6 +32,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.middleware("http")(observability.observe_requests)
+app.include_router(observability.router)
 app.include_router(transactions.router)
 app.include_router(categories.router)
 app.include_router(summary.router)

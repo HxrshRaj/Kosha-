@@ -184,3 +184,11 @@ transaction form validation, and the list-build performance benchmark.
 See [`docs/publishing.md`](docs/publishing.md) for the honest split
 between "a real signed release build exists" and "an actual Play Store
 listing requires a Google account you'd need to provide."
+
+## Observability, caching, real-time and BLoC (added in the CI PR)
+
+- **Metrics and logs:** `GET /metrics` exposes Prometheus-format request counters and latency histograms per route; every request logs one JSON line (request id, route, status, ms) and echoes `x-request-id`.
+- **Caching:** monthly and yearly summaries use a 30 s TTL cache that every successful write to `/transactions` or `/categories` invalidates. Hit and miss counts are in `/metrics`.
+- **Real-time:** `WS /ws/events` pushes a `changed` event after each successful write, so a client can refetch instead of polling.
+- **BLoC:** the transaction list's search and income/expense filter is a `Cubit` (`flutter_bloc`, tested with `bloc_test`). Data stays in Riverpod; the cubit owns only the view filter.
+- **Limits:** the cache, metrics and WebSocket client set live in one process, so they are not shared across workers or restarts. No Prometheus server or dashboard is deployed. The Flutter app subscribes to `/ws/events` and re-syncs on each event, reconnecting with capped backoff; its own writes also trigger one redundant re-sync.
